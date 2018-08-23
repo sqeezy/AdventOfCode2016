@@ -25,15 +25,41 @@ let commands = input.Split([|'\n'|])
                 |> List.ofArray
                 |> List.map (fun s -> s |> Seq.toList |> List.map command)
 
-let keyPad = [  (0,0), 1;
-                (1,0), 2;
-                (2,0), 3;
-                (0,1), 4;
-                (1,1), 5;
-                (2,1), 6;
-                (0,2), 7;
-                (1,2), 8;
-                (2,2), 9; ] |> Map.ofSeq
+(*
+1 2 3
+4 5 6
+7 8 9
+*)
+let keyPad = [  (0,0), '1';
+                (1,0), '2';
+                (2,0), '3';
+                (0,1), '4';
+                (1,1), '5';
+                (2,1), '6';
+                (0,2), '7';
+                (1,2), '8';
+                (2,2), '9'; ] |> Map.ofSeq
+(*
+    1
+  2 3 4
+5 6 7 8 9
+  A B C
+    D
+*)
+let keyPad2 = [ (0,-2), '1';
+                (-1,-1), '2';
+                (0,-1), '3';
+                (1,-1), '4';
+                (-2,0), '5';
+                (-1,0), '6';
+                (0,0), '7';
+                (1,0), '8';
+                (2,0), '9'; 
+                (-1,1), 'A';
+                (0,1), 'B';
+                (1,1), 'C';
+                (0,2), 'D';
+                ] |> Map.ofSeq
 
 
 let translatePosition (x,y) command=
@@ -44,7 +70,7 @@ let translatePosition (x,y) command=
     | D -> (x, y+1)
 
 let isInsideKeypad pos=
-    match keyPad.TryFind pos with
+    match keyPad2.TryFind pos with
     |None   -> false
     |Some _ -> true
 
@@ -61,16 +87,15 @@ let rec applyCommandChain  commands pos=
                 |> applyCommandChain cs
 
 
-type State = {Position:(int*int); Commands:Command list list; Keys:int list}
+type State = {Position:(int*int); Commands:Command list list; Keys:char list}
 
-let initial = {Position = (1,1); Commands = commands; Keys = List.empty}
 
 let findNextKey ({Position=pos; Commands=commands; Keys=keys} as s) =
     match commands with
     |[]     -> None 
     |chain::cs  -> 
                 let position = applyCommandChain chain pos
-                let key = keyPad.[position]
+                let key = keyPad2.[position]
                 Some {Position=position; Commands=cs; Keys=key::keys}
 
 let rec solvePartOne state=
@@ -78,4 +103,9 @@ let rec solvePartOne state=
     |None -> state
     |Some s -> solvePartOne s
 
-let resultPartOne =  (solvePartOne initial).Keys |> List.rev
+let initial1 = {Position = (1,1); Commands = commands; Keys = List.empty}
+let resultPartOne =  (solvePartOne initial1).Keys |> List.rev
+
+
+let initial2 = {Position = (-2,0); Commands = commands; Keys = List.empty}
+let resultPartTwo=  (solvePartOne initial2).Keys |> List.rev
