@@ -1,11 +1,12 @@
 open System.IO
-let input = File.ReadAllLines("Day03.txt")
+let input = File.ReadAllText "Day03.txt"
 
-// let input = """ 324  768  190
-//  985  309  356
-//  41  491  802
-//  997  793  905
-//  976  684  837"""
+// let input = """101 301 501
+// 102 302 502
+// 103 303 503
+// 201 401 601
+// 202 402 602
+// 203 403 603"""
 
 type Triangle = {A:int; B:int; C:int}
 
@@ -18,10 +19,12 @@ let triangle (s:string[]) = {
 let splitNumbers (s : string) = s.Split([|' '|])
                                     |> Array.filter (fun s -> s<>"")
 
-let lineToTriangle  =  splitNumbers >> triangle
+let splitLinewise (s:string) = s.Split [|'\n'|] 
 
-let triangles = input
-                    |> Array.map lineToTriangle
+let parseLogicPartOne = splitLinewise 
+                        >> Array.map splitNumbers 
+                        >> Array.map triangle  
+
 let variations t = [
                         (t.A, t.B, t.C)
                         (t.C, t.A, t.B)
@@ -32,6 +35,7 @@ let isValid (x1,x2,x3) = x1+x2 > x3
 
 let triangleValid = variations >> Seq.map isValid >> Seq.fold (&&) true
 
-let resultPartOne = triangles
-                        |> Seq.filter triangleValid
-                        |> Seq.length
+let resultPartOne = input
+                    |> parseLogicPartOne
+                    |> Seq.filter triangleValid
+                    |> Seq.length
