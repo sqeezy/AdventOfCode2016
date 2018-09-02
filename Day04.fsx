@@ -32,8 +32,26 @@ let actualChecksum (name:string) =
 let isValidRow (name:string, _, checksum:string) =
     actualChecksum name = checksum
 
-let resultPartOne = input 
-                    |> List.map splitIntoParts
-                    |> List.filter isValidRow
+let validRows = input 
+                |> List.map splitIntoParts
+                |> List.filter isValidRow
+let resultPartOne = validRows
                     |> List.map (fun (_,id,_) -> id)
                     |> List.sum
+
+let shift (c:char) (i:int) = ((c |> int) - 96  + i) % 26
+                             |> (+) 96 
+                             |> char
+
+let decriptSingleChar (i:int) (c:char) = 
+    match c with
+    | '-' -> ' '
+    | x -> shift x i
+
+let decriptString (s:string) (i:int) = s|> Seq.map (decriptSingleChar i) |> Seq.map string |> String.concat ""
+
+let resultPartTwo = validRows 
+                    |> List.map (fun(name , id, _) -> (decriptString name id, id))
+                    |> List.filter (fun (deciphered, _) -> deciphered.Contains("north"))
+                    |> List.map (fun (_, id) -> id)
+                    |> List.head
