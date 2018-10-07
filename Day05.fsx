@@ -14,19 +14,16 @@ let hashWithSalt (salt:int) = (input + salt.ToString())
                                  |> System.Text.Encoding.ASCII.GetBytes 
                                  |> md5
 
-let isInterestingHash (hash:string) =
-    match hash.StartsWith("00000") with
-    | true -> Some hash.[5]
-    | false -> None
+let isInterestingHash (hash:string) = hash.StartsWith("00000")
 
 let rec findPassword i (chars:char list) =
     let hash = hashWithSalt i
     match isInterestingHash hash with
-    | Some char ->
-        let newChars = char::chars
+    | true ->
+        let newChars = hash.[5]::chars
         match newChars.Length with
         | x when x > 7 -> List.rev newChars
         | _            -> findPassword (i+1) newChars
-    | None -> findPassword (i+1) chars
+    | false -> findPassword (i+1) chars
 
 let resultPartOne = findPassword 0 List.Empty |> String.Concat
