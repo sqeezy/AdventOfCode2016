@@ -16,14 +16,31 @@ let hashWithSalt (salt:int) = (input + salt.ToString())
 
 let isInterestingHash (hash:string) = hash.StartsWith("00000")
 
-let rec findPassword i (chars:char list) =
+let saveSixthChar hash state = Seq.item 5 hash :: state
+
+let stateIsFinal state = Seq.length state > 7
+
+let rec findPassword i (state:char list) =
     let hash = hashWithSalt i
     match isInterestingHash hash with
     | true ->
-        let newChars = hash.[5]::chars
-        match newChars.Length with
-        | x when x > 7 -> List.rev newChars
-        | _            -> findPassword (i+1) newChars
-    | false -> findPassword (i+1) chars
+        let newChars = saveSixthChar hash state
+        match stateIsFinal newChars with
+        | true  -> List.rev newChars
+        | false -> findPassword (i+1) newChars
+    | false -> findPassword (i+1) state
 
-let resultPartOne = findPassword 0 List.Empty |> String.Concat
+
+let rec findPassword2 isMatch saveToState isFinished i state =
+    let hash = hashWithSalt i
+    match isMatch hash with
+    | true ->
+        let newChars = saveToState hash state
+        match isFinished newChars with
+        | true  -> List.rev newChars
+        | false -> findPassword (i+1) newChars
+    | false -> findPassword (i+1) state
+
+let solverPartOne = findPassword2 isInterestingHash saveSixthChar stateIsFinal 
+
+let resultPartOne = solverPartOne 0 List.Empty |> String.Concat
