@@ -17,23 +17,38 @@ let personalInput = "wtnhxymk"
 let personalHash = hashWithSalt <| personalInput
 
 //general solver
-let solver isMatch saveToState isFinished i state =
+let solver isMatch saveToState isFinished postprocess i state =
     let rec solve i state = 
         let hash = personalHash i
         match isMatch hash with
         | true ->
             let newChars = saveToState hash state
             match isFinished newChars with
-            | true  -> Seq.rev newChars
+            | true  -> postprocess newChars
             | false -> solve (i+1) newChars
         | false -> solve (i+1) state
     solve i state
 
-//part one constraints for solver
 let isInterestingHash (hash:string) = hash.StartsWith("00000")
+
+//part one parameters for solver
 let saveSixthChar hash state = Seq.item 5 hash :: state
 let pwIsLongEnough state = Seq.length state > 7
 
+//part two parameters for solver
+let initial = Map.empty
+let parseIndex hash = 
+    match Int32.TryParse(Seq.item 5 hash) with
+    | (true,int) -> Some(int)
+    | _ -> None
+
+// let placeInSolution position state =
+//     match Map.tryFind position state
+
+let saveSeventhAtPosition hash state =
+    match parseIndex hash with
+    | Some i -> Option.map
+
 //use part one logic
-let solverPartOne = solver isInterestingHash saveSixthChar pwIsLongEnough 
+let solverPartOne = solver isInterestingHash saveSixthChar pwIsLongEnough Seq.rev
 let resultPartOne = solverPartOne 0 List.Empty |> String.Concat
