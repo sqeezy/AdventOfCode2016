@@ -1,6 +1,8 @@
 open System.Security.Cryptography
 open System.Text
 open System
+open System.Collections.Generic
+open System.Collections.Generic
 
 let md5 (data : byte array) : string =
     use md5 = MD5.Create()
@@ -36,18 +38,23 @@ let saveSixthChar hash state = Seq.item 5 hash :: state
 let pwIsLongEnough state = Seq.length state > 7
 
 //part two parameters for solver
-let initial = Map.empty
+type Key = Value of int
+let initial = new Dictionary<int, char>()
+
 let parseIndex hash = 
     match Int32.TryParse(Seq.item 5 hash) with
     | (true,int) -> Some(int)
     | _ -> None
 
-// let placeInSolution position state =
-//     match Map.tryFind position state
+let placeInSolution position (state : Dictionary<int, char>) =
+    match state.ContainsKey(position) with
+    | true  -> state
+    | false -> state.Add(position, 'c'); state
 
 let saveSeventhAtPosition hash state =
     match parseIndex hash with
-    | Some i -> Option.map
+    | Some i -> placeInSolution i state
+    | None   -> state
 
 //use part one logic
 let solverPartOne = solver isInterestingHash saveSixthChar pwIsLongEnough Seq.rev
